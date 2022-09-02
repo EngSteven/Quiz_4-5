@@ -14,7 +14,7 @@ class List {
         int quantity;
         bool empty;
         Node<T> *searchPosition = NULL;
-        //Node<T> *searchBehind = NULL;
+        Node<T> *searchBehind = NULL;
 
     public:
         List() {
@@ -28,11 +28,10 @@ class List {
             Node<T> *newNode = new Node<T>(pData);
 
             if (quantity>0) {
-                this->last->setPrev(last);      //se establece el prev de last
-                this->last->setNext(newNode);   
+                this->last->setPrev(newNode);      //se establece el prev de last
+                this->last->setNext(newNode);
             } else {
-                this->first = newNode;  
-                this->last = newNode;
+                this->first = newNode;
             }
             this->last = newNode;
 
@@ -44,10 +43,6 @@ class List {
             return this->first;
         }
 
-        Node<T>* getLast() {
-            return this->last;
-        }
-
         int getSize() {
             return quantity;
         }
@@ -56,16 +51,15 @@ class List {
             return !quantity;
         }
 
-        T* find(int pPosition) {    //el find ya no necesita el search behind
+        T* find(int pPosition) {
             T* result = NULL;
             searchPosition = this->first;
-            //searchBehind = NULL;
-            
+            searchBehind = NULL;
+
             if (pPosition<getSize()) {
-                cout<<"\nSize: "<<getSize()<<endl;
                 while(pPosition>0) {
-                    //searchBehind = searchPosition;
-                    
+                    searchBehind = searchPosition;
+                    searchPosition->setPrev(searchPosition);
                     searchPosition = searchPosition->getNext();
                     pPosition--;
                 }
@@ -84,16 +78,13 @@ class List {
                 T* result = find(pPosition);
                 
                 newNode->setNext(searchPosition);
-                //if (searchBehind!=NULL) {
-                    //searchBehind->setNext(newNode);
-                if (searchPosition->getPrev() != NULL) {            //se usa el pointer prev en lugar de ir guardando cada behind position
-                    
-                    //-----------------------------------------
+                if (searchBehind!=NULL) {
+                    searchBehind->setNext(newNode);
+                   
                     searchPosition->getPrev()->setNext(newNode);
                     newNode->setPrev(searchPosition->getPrev());
                     searchPosition->setPrev(newNode);
                     newNode->setNext(searchPosition);
-                    //-----------------------------------------
 
                 } else {
                     this->first = newNode;
@@ -104,45 +95,34 @@ class List {
                 add(pData);
             }
         }
-        
+
         bool remove(int pPosition) {
             bool result = false;
             if (first!=NULL && pPosition<getSize()) {
                 Node<T> *search = first;
                 if (pPosition!=0) {
-                    find(pPosition);
-                    
-                    //searchBehind->setNext(searchPosition->getNext());
+                    T* data = find(pPosition);
 
-                    if (searchPosition==last) {
-                        //last = searchBehind;
-                        last = last->getPrev();
-                        last->setNext(NULL);
-                        searchPosition->setPrev(NULL);
-                        cout<<"\nSe entro"<<endl;
-                    }
-
+                    searchBehind->setNext(searchPosition->getNext());
                     
-                    //-----------------------------------------------------------
-                    //searchPosition->getPrev()->setNext(searchPosition->getNext());
+                    /*Se queria implementar de esta forma, pero no da el resultado esparado
                     searchPosition->getPrev()->setNext(searchPosition->getNext());
                     searchPosition->getNext()->setPrev(searchPosition->getPrev());
-                    
-                    searchPosition->setNext(NULL);
+                    */
+                    if (searchPosition==last) {
+                        last = last->getPrev();
+                    }
                     searchPosition->setPrev(NULL);
-                    //-----------------------------------------------------------
-
-                    //searchPosition->setNext(NULL);
+                    searchPosition->setNext(NULL);
                 } else {
                     first = first->getNext();
-                    first->setPrev(NULL);
                     search->setNext(NULL);
                     delete search;
                 }
                 quantity--;
             }
             return result;
-        } 
+        }
 };
 
 #endif
